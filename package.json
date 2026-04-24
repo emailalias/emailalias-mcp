@@ -1,6 +1,6 @@
 {
   "name": "@emailalias/mcp",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "MCP server for EmailAlias.io — manage email aliases from Claude, Cursor, and other AI assistants.",
   "type": "module",
   "main": "dist/index.js",
