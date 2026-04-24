@@ -1,0 +1,35 @@
+name: Publish to npm
+
+# Fires on every annotated tag matching vX.Y.Z.
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  publish:
+    name: Build & publish
+    runs-on: ubuntu-latest
+    # Required for OIDC (Trusted Publisher) + npm provenance attestation.
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          # Node 24 ships with npm 11, required for the Trusted Publisher
+          # OIDC exchange flow.
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Build
+        run: npm run build
+
+      - name: Publish to npm via Trusted Publisher
+        # --access public required for scoped packages on first publish.
+        run: npm publish --provenance --access public
