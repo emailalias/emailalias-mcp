@@ -44,7 +44,7 @@ export function registerTools(server: McpServer, client: Client) {
 
   server.tool(
     "create_alias",
-    "Create a new email alias. 'random' generates a short code; 'custom' uses custom_code; 'tagged' prepends a random code to a user-provided tag. destination_email must be the user's primary email OR a verified forwarding destination.",
+    "Create a new email alias. 'random' generates a short code; 'custom' uses custom_code; 'tagged' prepends a random code to a user-provided tag. destination_email must be the user's primary email OR a verified forwarding destination. display_name is Premium-only and shown as the sender on outbound mail.",
     {
       alias_type: z.enum(["random", "custom", "tagged"]).default("random"),
       label: z.string().optional().describe("Human-friendly label, e.g. 'Shopping'"),
@@ -52,19 +52,31 @@ export function registerTools(server: McpServer, client: Client) {
       destination_email: z.string().email().optional(),
       custom_code: z.string().optional().describe("Required when alias_type='custom'"),
       tag: z.string().optional().describe("Required when alias_type='tagged'"),
+      display_name: z.string().max(32).optional().describe("Premium-only sender label shown on outbound mail (e.g. 'Sam Carter'). Set on creation activates immediately."),
     },
     async (args) => safeCall(() => client.createAlias(args)),
   );
 
   server.tool(
     "update_alias",
-    "Update an alias: toggle active (enable/disable) or rename its label.",
+    "Update an alias: toggle active (enable/disable) or rename its label. To change the sender display name, use update_alias_display_name (separate 24h-cooldown endpoint).",
     {
       alias_id: z.string().uuid(),
       active: z.boolean().optional(),
       label: z.string().optional(),
     },
     async ({ alias_id, ...patch }) => safeCall(() => client.updateAlias(alias_id, patch)),
+  );
+
+  server.tool(
+    "update_alias_display_name",
+    "Schedule a display-name change on an alias (Premium-only). Edits do NOT take effect immediately — the new value lands in display_name_pending and promotes 24h after the most recent edit. Editing again resets the clock. Capped at 3 edits per rolling 24h per alias. Pass display_name=null (or empty string) to clear; clearing follows the same cooldown. Brand-impersonation patterns (PayPal, Apple, banks, etc.) are rejected with 400.",
+    {
+      alias_id: z.string().uuid(),
+      display_name: z.string().max(32).nullable().describe("New display name, or null to clear. Max 32 characters."),
+    },
+    async ({ alias_id, display_name }) =>
+      safeCall(() => client.updateAliasDisplayName(alias_id, display_name)),
   );
 
   server.tool(

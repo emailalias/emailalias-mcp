@@ -70,6 +70,7 @@ Then change `command` to `emailalias-mcp` and drop the `-y @emailalias/mcp` args
 | `list_aliases` | All aliases with forwarded/blocked counts |
 | `create_alias` | Create a random / custom / tagged alias |
 | `update_alias` | Toggle active, rename label |
+| `update_alias_display_name` | Change the sender display name (Premium, 24h cooldown) |
 | `delete_alias` | Permanently delete an alias |
 | `list_available_domains` | System + custom domains available |
 | `list_destinations` | Primary + verified forwarding inboxes |
