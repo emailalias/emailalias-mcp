@@ -73,6 +73,9 @@ Then change `command` to `emailalias-mcp` and drop the `-y @emailalias/mcp` args
 | `update_alias_display_name` | Change the sender display name (Premium, 24h cooldown) |
 | `delete_alias` | Permanently delete an alias |
 | `list_available_domains` | System + custom domains available |
+| `list_domains` | Custom domains with verification + catch-all detail |
+| `set_catch_all` | Enable/disable catch-all on a custom domain (Premium) |
+| `disable_catch_all_aliases` | Bulk-disable aliases catch-all auto-created |
 | `list_destinations` | Primary + verified forwarding inboxes |
 | `add_destination` | Register a new forwarding destination (triggers verify email) |
 | `delete_destination` | Remove a destination (blocks if aliases still use it) |
@@ -84,7 +87,7 @@ Then change `command` to `emailalias-mcp` and drop the `-y @emailalias/mcp` args
 ## Example prompts (Claude Desktop)
 
 ```
-Create a disposable alias for signing up to Substack. Label it "newsletter".
+Create an alias for signing up to Substack. Label it "newsletter".
 ```
 
 ```

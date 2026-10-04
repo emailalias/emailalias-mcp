@@ -93,6 +93,33 @@ export function registerTools(server: McpServer, client: Client) {
     async () => safeCall(() => client.listAvailableDomains()),
   );
 
+  // ── Custom domains ─────────────────────────────────────────────────────────
+  server.tool(
+    "list_domains",
+    "List the user's custom domains with full detail: id, domain_name, verified, the SPF/DKIM/DMARC/MX/mail-from check flags, catch_all + catch_all_destination, alias_count, and auto_created_alias_count. Use this to get a domain's id before setting catch-all or disabling its auto-created aliases.",
+    {},
+    async () => safeCall(() => client.listDomains()),
+  );
+
+  server.tool(
+    "set_catch_all",
+    "Enable or disable catch-all on a verified custom domain (Premium-only). With catch-all on, any address at the domain auto-creates an alias on its first inbound email — handy for giving out addresses on the fly. When enabling, destination must be the user's primary email or a verified forwarding destination (defaults to the primary email if omitted); that inbox receives every auto-created alias. Disabling clears the destination but leaves already-created aliases forwarding — use disable_catch_all_aliases to turn those off.",
+    {
+      domain_id: z.string().uuid(),
+      catch_all: z.boolean(),
+      destination: z.string().email().optional().describe("Required-ish when enabling: the inbox to forward catch-all mail to. Defaults to the account's primary email."),
+    },
+    async ({ domain_id, catch_all, destination }) =>
+      safeCall(() => client.setCatchAll(domain_id, catch_all, destination)),
+  );
+
+  server.tool(
+    "disable_catch_all_aliases",
+    "Bulk-disable every active alias that catch-all auto-created on a domain. Sets them inactive (forwarding stops) without deleting them, and leaves hand-created aliases and the catch-all setting itself untouched. Idempotent — returns { disabled: <count> }. Use after turning catch-all off, or to stop a flood of auto-created aliases.",
+    { domain_id: z.string().uuid() },
+    async ({ domain_id }) => safeCall(() => client.disableCatchAllAliases(domain_id)),
+  );
+
   // ── Forwarding destinations ───────────────────────────────────────────────
   server.tool(
     "list_destinations",
