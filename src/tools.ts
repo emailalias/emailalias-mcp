@@ -102,6 +102,27 @@ export function registerTools(server: McpServer, client: Client) {
   );
 
   server.tool(
+    "add_domain",
+    "Register a custom domain on the account. Returns the domain record including required_dns_records — the TXT/MX/SPF/DKIM/DMARC records the user must publish at their registrar before the domain can be verified. Does NOT verify it; call verify_domain after the DNS records propagate.",
+    { domain_name: z.string().describe("The domain to add, e.g. 'example.com'.") },
+    async ({ domain_name }) => safeCall(() => client.addDomain(domain_name)),
+  );
+
+  server.tool(
+    "verify_domain",
+    "Re-check a custom domain's DNS and mark it verified once TXT, MX, SPF, DKIM, and DMARC all pass. Returns the updated verification flags. Run after adding the DNS records from add_domain (records can take minutes to hours to propagate).",
+    { domain_id: z.string().uuid() },
+    async ({ domain_id }) => safeCall(() => client.verifyDomain(domain_id)),
+  );
+
+  server.tool(
+    "delete_domain",
+    "Permanently remove a custom domain. This also deletes every alias on that domain and cannot be undone. Prefer disabling individual aliases if the user might want them back.",
+    { domain_id: z.string().uuid() },
+    async ({ domain_id }) => safeCall(() => client.deleteDomain(domain_id).then(() => "deleted")),
+  );
+
+  server.tool(
     "set_catch_all",
     "Enable or disable catch-all on a verified custom domain (Premium-only). With catch-all on, any address at the domain auto-creates an alias on its first inbound email — handy for giving out addresses on the fly. When enabling, destination must be the user's primary email or a verified forwarding destination (defaults to the primary email if omitted); that inbox receives every auto-created alias. Disabling clears the destination but leaves already-created aliases forwarding — use disable_catch_all_aliases to turn those off.",
     {
@@ -141,6 +162,14 @@ export function registerTools(server: McpServer, client: Client) {
     { destination_id: z.string().uuid() },
     async ({ destination_id }) =>
       safeCall(() => client.deleteDestination(destination_id).then(() => "removed")),
+  );
+
+  server.tool(
+    "resend_destination_verification",
+    "Send a fresh verification email to a pending (unverified) forwarding destination. Use when the original link expired or was lost.",
+    { destination_id: z.string().uuid() },
+    async ({ destination_id }) =>
+      safeCall(() => client.resendDestinationVerification(destination_id)),
   );
 
   // ── Send email ────────────────────────────────────────────────────────────

@@ -74,11 +74,15 @@ Then change `command` to `emailalias-mcp` and drop the `-y @emailalias/mcp` args
 | `delete_alias` | Permanently delete an alias |
 | `list_available_domains` | System + custom domains available |
 | `list_domains` | Custom domains with verification + catch-all detail |
+| `add_domain` | Register a custom domain (returns required DNS records) |
+| `verify_domain` | Re-check DNS and mark the domain verified |
+| `delete_domain` | Remove a custom domain (also deletes its aliases) |
 | `set_catch_all` | Enable/disable catch-all on a custom domain (Premium) |
 | `disable_catch_all_aliases` | Bulk-disable aliases catch-all auto-created |
 | `list_destinations` | Primary + verified forwarding inboxes |
 | `add_destination` | Register a new forwarding destination (triggers verify email) |
 | `delete_destination` | Remove a destination (blocks if aliases still use it) |
+| `resend_destination_verification` | Resend the verify email to a pending destination |
 | `send_email` | Send from an alias (Premium) |
 | `get_dashboard_stats` | Account-wide counters |
 | `list_email_logs` | Paginated forwarding log (last 90 days) |
